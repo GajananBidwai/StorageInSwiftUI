@@ -12,7 +12,10 @@ import SwiftData
 struct StorageInSwiftUIApp: App {
     var body: some Scene {
         WindowGroup {
+            //To run the Auther list example
             AuthorListView()
+            //To run the @AppStorage example and peristing of the data storage
+            //ContentView()
         }
         .modelContainer(for: [Author.self, Book.self])
     }
