@@ -14,15 +14,18 @@ struct AddBook: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Insert Title", text: $titleInput)
-                TextField("Insert Author", text: $authorInput)
-                TextField("Insert Year", text: $yearInput)
-                    .keyboardType(.numberPad)
-                
-                Button("Save Book") {
-                    storeBook()
+                Section(header: Text("Book Details")) {
+                    TextField("Insert Title", text: $titleInput)
+                    TextField("Insert Author", text: $authorInput)
+                    TextField("Insert Year", text: $yearInput)
+                        .keyboardType(.numberPad)
                 }
-                .frame(maxWidth: .infinity)
+                
+                Button(action: storeBook) {
+                    Text("Save Book")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
             }
             .navigationTitle("Add Book")
         }
@@ -30,17 +33,33 @@ struct AddBook: View {
     
     func storeBook() {
         let title = titleInput.trimmingCharacters(in: .whitespaces)
-        let author = authorInput.trimmingCharacters(in: .whitespaces)
+        let authorName = authorInput.trimmingCharacters(in: .whitespaces)
         
         guard let year = Int(yearInput),
               !title.isEmpty,
-              !author.isEmpty else { return }
+              !authorName.isEmpty else { return }
+        let descriptor = FetchDescriptor<Author>(
+            predicate: #Predicate { $0.name == authorName }
+        )
         
-        let newBook = Book(title: title, author: author, year: year)
+        let matchingAuthors = (try? dbContext.fetch(descriptor)) ?? []
+        let author: Author
+        if let existingAuthor = matchingAuthors.first {
+            author = existingAuthor
+        } else {
+            author = Author(name: authorName)
+            dbContext.insert(author)
+        }
+
+        let newBook = Book(title: title, year: year, author: author)
         dbContext.insert(newBook)
         
-        try? dbContext.save()
-        dismiss()  // Close screen
+        do {
+            try dbContext.save()
+            dismiss()
+        } catch {
+            print("Failed to save:", error.localizedDescription)
+        }
     }
 }
 
@@ -48,3 +67,4 @@ struct AddBook: View {
     AddBook()
         .modelContainer(for: Book.self, inMemory: true)
 }
+

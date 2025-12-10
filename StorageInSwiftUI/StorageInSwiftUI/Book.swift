@@ -12,16 +12,24 @@ import SwiftData
 //@Attribute is used inside your @Model class to add extra rules to a property. It helps SwiftData understand how this property should be stored.
 
 @Model
-class Book: Identifiable {
-    var id: UUID
-    var title: String
-    var author: String
-    var year: Int
+class Author {
+    var name: String
+    @Relationship(deleteRule: .cascade) var books: [Book] = []
 
-    init(title: String, author: String, year: Int) {
-        self.id = UUID()
+    init(name: String) {
+        self.name = name
+    }
+}
+
+@Model
+class Book {
+    var title: String
+    var year: Int
+    var author: Author?
+
+    init(title: String, year: Int, author: Author?) {
         self.title = title
-        self.author = author
         self.year = year
+        self.author = author
     }
 }

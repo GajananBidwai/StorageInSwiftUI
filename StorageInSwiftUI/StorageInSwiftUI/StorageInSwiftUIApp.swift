@@ -12,8 +12,8 @@ import SwiftData
 struct StorageInSwiftUIApp: App {
     var body: some Scene {
         WindowGroup {
-            BooksList()
+            AuthorListView()
         }
-        .modelContainer(for: Book.self)
+        .modelContainer(for: [Author.self, Book.self])
     }
 }
